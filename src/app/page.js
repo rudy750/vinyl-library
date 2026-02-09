@@ -12,6 +12,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVinyl, setEditingVinyl] = useState(null);
   const [error, setError] = useState(null);
+  const [resolvingArt, setResolvingArt] = useState(false);
 
   const fetchVinyls = async () => {
     try {
@@ -23,6 +24,25 @@ export default function Home() {
       setError('Failed to load vinyl collection');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResolveArt = async () => {
+    setResolvingArt(true);
+    try {
+      const response = await fetch('/api/cover-art/resolve-all', { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok) throw new Error('Failed to resolve');
+      
+      let message = `Resolved ${data.resolved} covers out of ${data.processed} checked.`;
+      if (data.failures > 0) message += ` ${data.failures} failed.`;
+      
+      alert(message);
+      await fetchVinyls();
+    } catch (err) {
+      alert('Failed to resolve artwork');
+    } finally {
+      setResolvingArt(false);
     }
   };
 
@@ -202,6 +222,30 @@ export default function Home() {
               <p className="text-gray-600">
                 {vinyls.length} {vinyls.length === 1 ? 'record' : 'records'} in your collection
               </p>
+              {vinyls.some(v => !v.cover_url) && (
+                <button
+                  onClick={handleResolveArt}
+                  disabled={resolvingArt}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {resolvingArt ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Resolving...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                      </svg>
+                      Resolve All Art
+                    </>
+                  )}
+                </button>
+              )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {vinyls.map((vinyl) => (

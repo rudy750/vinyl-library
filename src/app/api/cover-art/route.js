@@ -13,44 +13,109 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Artist and title are required' }, { status: 400 });
   }
 
+  // Helper function to get final URL after following redirects
+  async function getFinalImageUrl(url) {
+    try {
+      const response = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+      if (response.ok && response.url !== url) {
+        return response.url; // Return the final URL after redirect
+      }
+      return response.ok ? url : null;
+    } catch {
+      return null;
+    }
+  }
+
   try {
-    // Search MusicBrainz for the release group (album)
-    const query = `releasegroup:"${title}" AND artist:"${artist}"`;
-    const mbResponse = await fetch(
-      `${MB_BASE}/release-group/?query=${encodeURIComponent(query)}&limit=5&fmt=json`,
+    // 1. Try individual releases first (more reliable for cover art)
+    const relQuery = `release:"${title}" AND artist:"${artist}"`;
+    const relResponse = await fetch(
+      `${MB_BASE}/release/?query=${encodeURIComponent(relQuery)}&limit=5&fmt=json`,
       { headers: { 'User-Agent': USER_AGENT } }
     );
 
-    if (!mbResponse.ok) {
-      throw new Error(`MusicBrainz API error: ${mbResponse.status}`);
-    }
+    if (relResponse.ok) {
+      const relData = await relResponse.json();
+      const releases = relData['releases'] || [];
 
-    const mbData = await mbResponse.json();
-    const releaseGroups = mbData['release-groups'];
-
-    if (!releaseGroups || releaseGroups.length === 0) {
-      return NextResponse.json({ error: 'No results found' }, { status: 404 });
-    }
-
-    // Try each release group until we find one with cover art
-    for (const rg of releaseGroups) {
-      const coverUrl = `${CAA_BASE}/release-group/${rg.id}/front-500`;
-
-      // Check if cover art exists (HEAD request to avoid downloading the image)
-      try {
-        const coverCheck = await fetch(coverUrl, { method: 'HEAD', redirect: 'follow' });
-        if (coverCheck.ok) {
+      for (const release of releases) {
+        const coverUrl = `${CAA_BASE}/release/${release.id}/front-500`;
+        const finalUrl = await getFinalImageUrl(coverUrl);
+        if (finalUrl) {
           return NextResponse.json({
-            cover_url: coverUrl,
-            mbid: rg.id,
-            title: rg.title,
-            artist: rg['artist-credit']?.[0]?.name || artist,
+            cover_url: finalUrl,
+            mbid: release.id,
+            title: release.title,
+            artist: release['artist-credit']?.[0]?.name || artist,
+            source: 'release',
           });
         }
-      } catch {
-        // This release group has no cover art, try next
-        continue;
       }
+    }
+
+    // 2. Fallback: Try release-group search, then get a release from it
+    const rgQuery = `releasegroup:"${title}" AND artist:"${artist}"`;
+    const rgResponse = await fetch(
+      `${MB_BASE}/release-group/?query=${encodeURIComponent(rgQuery)}&limit=5&fmt=json`,
+      { headers: { 'User-Agent': USER_AGENT } }
+    );
+
+    if (rgResponse.ok) {
+      const rgData = await rgResponse.json();
+      const releaseGroups = rgData['release-groups'] || [];
+
+      for (const rg of releaseGroups) {
+        // Get releases for this release group
+        const rgReleasesResponse = await fetch(
+          `${MB_BASE}/release/?release-group=${rg.id}&limit=5&fmt=json`,
+          { headers: { 'User-Agent': USER_AGENT } }
+        );
+
+        if (rgReleasesResponse.ok) {
+          const rgReleasesData = await rgReleasesResponse.json();
+          const rgReleases = rgReleasesData['releases'] || [];
+
+          for (const release of rgReleases) {
+            const coverUrl = `${CAA_BASE}/release/${release.id}/front-500`;
+            const finalUrl = await getFinalImageUrl(coverUrl);
+            if (finalUrl) {
+              return NextResponse.json({
+                cover_url: finalUrl,
+                mbid: release.id,
+                title: release.title,
+                artist: release['artist-credit']?.[0]?.name || artist,
+                source: 'release-group',
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // 3. Last resort: iTunes Search API (Free, no key)
+    try {
+      const itunesTerm = encodeURIComponent(`${artist} ${title}`);
+      const itunesResponse = await fetch(
+        `https://itunes.apple.com/search?term=${itunesTerm}&media=music&entity=album&limit=1`
+      );
+
+      if (itunesResponse.ok) {
+        const itunesData = await itunesResponse.json();
+        if (itunesData.resultCount > 0) {
+          const result = itunesData.results[0];
+          // Get higher resolution image by replacing dimensions in URL
+          const highResUrl = result.artworkUrl100.replace('100x100', '600x600');
+
+          return NextResponse.json({
+            cover_url: highResUrl,
+            title: result.collectionName,
+            artist: result.artistName,
+            source: 'itunes',
+          });
+        }
+      }
+    } catch (itunesError) {
+      console.error('iTunes fallback error:', itunesError);
     }
 
     return NextResponse.json({ error: 'No cover art found for this album' }, { status: 404 });

@@ -15,6 +15,18 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*.archive.org',
       },
+      {
+        protocol: 'https',
+        hostname: '*.ca.archive.org',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.us.archive.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'is*.mzstatic.com',
+      },
     ],
   },
 };

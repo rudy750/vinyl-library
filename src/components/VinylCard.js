@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 const conditionColors = {
   'Mint': 'bg-green-100 text-green-800',
   'Near Mint': 'bg-emerald-100 text-emerald-800',
@@ -9,22 +11,33 @@ const conditionColors = {
   'Poor': 'bg-red-100 text-red-800',
 };
 
+function NoArtFallback() {
+  return (
+    <div className="w-full h-full flex items-center justify-center select-none">
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 export default function VinylCard({ vinyl, onEdit, onDelete }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="aspect-square bg-gradient-to-br from-gray-800 to-gray-900 relative">
-        {vinyl.cover_url ? (
+        {vinyl.cover_url && !imgError ? (
           <img
             src={vinyl.cover_url}
             alt={`${vinyl.title} cover`}
             className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-32 h-32 rounded-full bg-gray-700 border-4 border-gray-600 flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full bg-gray-500" />
-            </div>
-          </div>
+          <NoArtFallback />
         )}
       </div>
       
