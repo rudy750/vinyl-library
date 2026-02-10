@@ -5,6 +5,7 @@ import VinylCard from '@/components/VinylCard';
 import VinylForm from '@/components/VinylForm';
 import Modal from '@/components/Modal';
 import TrackList from '@/components/TrackList';
+import RecordChatBox from '@/components/RecordChatBox';
 
 export default function Home() {
   const [vinyls, setVinyls] = useState([]);
@@ -15,6 +16,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [resolvingArt, setResolvingArt] = useState(false);
   const [tracklistVinyl, setTracklistVinyl] = useState(null);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
 
   const fetchVinyls = async () => {
     try {
@@ -163,6 +165,22 @@ export default function Home() {
               </div>
               
               <button
+                onClick={() => setChatDialogOpen(true)}
+                className="relative group p-3 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full hover:shadow-lg transition-all duration-300 hover:scale-110"
+                title="Chat about your collection"
+              >
+                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2v2M12 20v2M22 12h-2M4 12H2" strokeLinecap="round" />
+                  <path d="M16 8l2-2M6 18l2-2M18 16l2 2M4 6l2 2" strokeLinecap="round" />
+                </svg>
+                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                  Ask AI
+                </span>
+              </button>
+              
+              <button
                 onClick={openAddModal}
                 className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
@@ -286,6 +304,18 @@ export default function Home() {
         {tracklistVinyl && (
           <TrackList artist={tracklistVinyl.artist} title={tracklistVinyl.title} />
         )}
+      </Modal>
+
+      {/* Record Chat Dialog */}
+      <Modal
+        isOpen={chatDialogOpen}
+        onClose={() => setChatDialogOpen(false)}
+        title="Vinyl Collection Advisor"
+      >
+        <RecordChatBox 
+          albumsOwned={vinyls} 
+          closeDialog={() => setChatDialogOpen(false)} 
+        />
       </Modal>
     </div>
   );
