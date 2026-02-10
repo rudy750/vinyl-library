@@ -23,11 +23,11 @@ function NoArtFallback() {
   );
 }
 
-export default function VinylCard({ vinyl, onEdit, onDelete }) {
+export default function VinylCard({ vinyl, onEdit, onDelete, onClick }) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer" onClick={() => onClick(vinyl)}>
       <div className="aspect-square bg-gradient-to-br from-gray-800 to-gray-900 relative">
         {vinyl.cover_url && !imgError ? (
           <img
@@ -75,7 +75,7 @@ export default function VinylCard({ vinyl, onEdit, onDelete }) {
         
         <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
           <button
-            onClick={() => onEdit(vinyl)}
+            onClick={(e) => { e.stopPropagation(); onEdit(vinyl); }}
             className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
             title="Edit"
           >
@@ -84,7 +84,7 @@ export default function VinylCard({ vinyl, onEdit, onDelete }) {
             </svg>
           </button>
           <button
-            onClick={() => onDelete(vinyl.id)}
+            onClick={(e) => { e.stopPropagation(); onDelete(vinyl.id); }}
             className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Delete"
           >

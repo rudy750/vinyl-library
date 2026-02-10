@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import VinylCard from '@/components/VinylCard';
 import VinylForm from '@/components/VinylForm';
 import Modal from '@/components/Modal';
+import TrackList from '@/components/TrackList';
 
 export default function Home() {
   const [vinyls, setVinyls] = useState([]);
@@ -13,6 +14,7 @@ export default function Home() {
   const [editingVinyl, setEditingVinyl] = useState(null);
   const [error, setError] = useState(null);
   const [resolvingArt, setResolvingArt] = useState(false);
+  const [tracklistVinyl, setTracklistVinyl] = useState(null);
 
   const fetchVinyls = async () => {
     try {
@@ -254,6 +256,7 @@ export default function Home() {
                   vinyl={vinyl}
                   onEdit={openEditModal}
                   onDelete={handleDeleteVinyl}
+                  onClick={setTracklistVinyl}
                 />
               ))}
             </div>
@@ -261,7 +264,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* Modal */}
+      {/* Add/Edit Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -272,6 +275,17 @@ export default function Home() {
           onSubmit={editingVinyl ? handleUpdateVinyl : handleAddVinyl}
           onCancel={closeModal}
         />
+      </Modal>
+
+      {/* Tracklist Modal */}
+      <Modal
+        isOpen={!!tracklistVinyl}
+        onClose={() => setTracklistVinyl(null)}
+        title={tracklistVinyl ? `${tracklistVinyl.title} — ${tracklistVinyl.artist}` : ''}
+      >
+        {tracklistVinyl && (
+          <TrackList artist={tracklistVinyl.artist} title={tracklistVinyl.title} />
+        )}
       </Modal>
     </div>
   );
