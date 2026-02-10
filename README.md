@@ -2,6 +2,8 @@
 
 A full-stack web application to catalog and manage your vinyl record collection. Built with Next.js, React, Tailwind CSS, and SQLite.
 
+![Vinyl Library Main View](screenshots/main-view.png)
+
 ## Features
 
 - **Add Records**: Catalog your vinyl collection with details like title, artist, year, genre, condition, and more
@@ -9,6 +11,7 @@ A full-stack web application to catalog and manage your vinyl record collection.
 - **Edit & Delete**: Update record information or remove items from your collection
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **Persistent Storage**: SQLite database stores your collection locally
+- **Cover Art**: Automatic album cover fetching from MusicBrainz and iTunes
 
 ## Tech Stack
 
@@ -39,6 +42,23 @@ A full-stack web application to catalog and manage your vinyl record collection.
 
 The database file (`vinyl-library.db`) will be created automatically on first run.
 
+## Screenshots
+
+### Main Collection View
+Browse your entire vinyl collection with a beautiful card-based layout. Each card displays album artwork, artist, year, genre, condition, and record label.
+
+![Main Collection View](screenshots/main-view.png)
+
+### Add New Vinyl
+Easily add new records to your collection with a comprehensive form that includes all the important details. The app can automatically fetch album artwork from online sources.
+
+![Add Vinyl Modal](screenshots/add-vinyl-modal.png)
+
+### Search Functionality
+Quickly find specific records in your collection by searching for title, artist, genre, or label. Results update in real-time as you type.
+
+![Search Results](screenshots/search-results.png)
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
@@ -49,6 +69,8 @@ The database file (`vinyl-library.db`) will be created automatically on first ru
 | PUT | `/api/vinyls/[id]` | Update a vinyl record |
 | DELETE | `/api/vinyls/[id]` | Delete a vinyl record |
 | GET | `/api/vinyls/search?q=query` | Search vinyl records |
+| POST | `/api/cover-art` | Fetch album cover art from MusicBrainz/iTunes |
+| POST | `/api/cover-art/resolve-all` | Resolve cover art for all records |
 
 ## Vinyl Record Schema
 
