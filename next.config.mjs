@@ -2,6 +2,7 @@
 const nextConfig = {
   /* config options here */
   reactCompiler: true,
+  serverExternalPackages: ['@github/copilot-sdk'],
   turbopack: {
     root: process.cwd(),
   },

@@ -5,6 +5,7 @@ import VinylCard from '@/components/VinylCard';
 import VinylForm from '@/components/VinylForm';
 import Modal from '@/components/Modal';
 import TrackList from '@/components/TrackList';
+import AlbumAdvisor from '@/components/AlbumAdvisor';
 
 export default function Home() {
   const [vinyls, setVinyls] = useState([]);
@@ -15,6 +16,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [resolvingArt, setResolvingArt] = useState(false);
   const [tracklistVinyl, setTracklistVinyl] = useState(null);
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   const fetchVinyls = async () => {
     try {
@@ -171,6 +173,16 @@ export default function Home() {
                 </svg>
                 <span className="hidden sm:inline">Add Vinyl</span>
               </button>
+
+              <button
+                onClick={() => setIsAdvisorOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-colors font-medium"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                <span className="hidden sm:inline">Ask AI</span>
+              </button>
             </div>
           </div>
         </div>
@@ -286,6 +298,16 @@ export default function Home() {
         {tracklistVinyl && (
           <TrackList artist={tracklistVinyl.artist} title={tracklistVinyl.title} />
         )}
+      </Modal>
+
+      {/* Album Advisor Modal */}
+      <Modal
+        isOpen={isAdvisorOpen}
+        onClose={() => setIsAdvisorOpen(false)}
+        title="Album Advisor"
+        wide
+      >
+        <AlbumAdvisor onClose={() => setIsAdvisorOpen(false)} />
       </Modal>
     </div>
   );

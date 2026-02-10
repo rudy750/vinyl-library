@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-export default function Modal({ isOpen, onClose, title, children }) {
+export default function Modal({ isOpen, onClose, title, children, wide }) {
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose();
@@ -27,7 +27,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className={`relative bg-white rounded-2xl shadow-xl ${wide ? 'max-w-2xl' : 'max-w-lg'} w-full max-h-[90vh] overflow-y-auto`}>
         <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
           <button
