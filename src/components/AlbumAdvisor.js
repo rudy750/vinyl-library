@@ -160,19 +160,25 @@ export default function AlbumAdvisor({ onClose }) {
   return (
     <div className="flex flex-col h-[70vh]">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-1">
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-1 bg-gradient-to-b from-purple-50/30 to-pink-50/30 -mx-6 -mt-6 px-6 pt-6 rounded-t-xl">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 py-8">
-            <p className="text-lg font-medium mb-1">Ask me about any album!</p>
-            <p className="text-sm">Upload a photo of a record or ask by name. I&apos;ll tell you about it, how rare it is, and if it matches your taste.</p>
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white mb-4 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+              </svg>
+            </div>
+            <p className="text-lg font-semibold text-gray-900 mb-2">Ask me about any album!</p>
+            <p className="text-sm text-gray-600 max-w-md mx-auto">Upload a photo of a record or ask by name. I&apos;ll tell you about it, how rare it is, and if it matches your taste.</p>
           </div>
         )}
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
+            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
               msg.role === 'user'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-100 text-gray-900'
+                ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white'
+                : 'bg-white border border-purple-100 text-gray-900'
             }`}>
               {msg.image && (
                 <img src={msg.image} alt="Uploaded album" className="w-32 h-32 object-cover rounded-lg mb-2" />
@@ -207,14 +213,24 @@ export default function AlbumAdvisor({ onClose }) {
 
       {/* Image preview */}
       {imagePreview && (
-        <div className="mb-2 flex items-center gap-2 px-1">
-          <img src={imagePreview} alt="Upload preview" className="w-16 h-16 object-cover rounded-lg border" />
-          <button onClick={clearImage} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        <div className="mb-3 flex items-center gap-3 px-1">
+          <div className="relative">
+            <img src={imagePreview} alt="Upload preview" className="w-16 h-16 object-cover rounded-lg border-2 border-purple-200 shadow-sm" />
+            <button
+              onClick={clearImage}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <span className="text-xs text-gray-600">Image ready to send</span>
         </div>
       )}
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+      <form onSubmit={handleSubmit} className="flex gap-2 items-end bg-white border border-purple-100 rounded-xl p-2 shadow-sm">
         <input
           type="file"
           ref={fileInputRef}
@@ -226,7 +242,7 @@ export default function AlbumAdvisor({ onClose }) {
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
-          className="p-2.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50"
+          className="p-2.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           title="Upload album photo"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -239,12 +255,12 @@ export default function AlbumAdvisor({ onClose }) {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about an album..."
           disabled={loading}
-          className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+          className="flex-1 px-4 py-2.5 bg-transparent border-0 focus:outline-none focus:ring-0 disabled:opacity-50 text-gray-900 placeholder:text-gray-400"
         />
         <button
           type="submit"
           disabled={loading || (!input.trim() && !imageData)}
-          className="px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
