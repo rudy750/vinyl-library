@@ -1,3 +1,26 @@
+/**
+ * AlbumAdvisor — Client-side chat UI for the Copilot SDK-powered Album Advisor
+ *
+ * This component is the front-end counterpart to the `/api/album-advisor` route.
+ * It provides a conversational interface where users can:
+ *   - Ask about any album by name (text prompt)
+ *   - Upload a photo of a vinyl record (vision / image attachment)
+ *   - Receive streamed, real-time AI responses with rich formatting
+ *
+ * Data flow:
+ *   1. User types a message or attaches an image
+ *   2. Component POSTs to /api/album-advisor with { message, imageBase64?, imageMimeType? }
+ *   3. The API route creates a Copilot SDK session and streams SSE events back
+ *   4. This component reads the SSE stream via ReadableStream and appends tokens
+ *      to the assistant message in real time (character-by-character rendering)
+ *
+ * This component does NOT interact with the Copilot SDK directly — all SDK
+ * communication happens server-side in the API route. The component only
+ * consumes the SSE stream that the route produces.
+ *
+ * @see /src/app/api/album-advisor/route.js — Server-side Copilot SDK integration
+ * @see /docs/copilot-sdk.md — Extended documentation
+ */
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -83,6 +106,25 @@ export default function AlbumAdvisor({ onClose }) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  /**
+   * Sends the user message to the Album Advisor API and streams the response.
+   *
+   * This is the core integration point with the Copilot SDK (via the API route).
+   * The flow:
+   *   1. Build the request body (message + optional base64 image)
+   *   2. POST to /api/album-advisor
+   *   3. Read the SSE stream using the Streams API (ReadableStream + getReader)
+   *   4. Parse each `data: {...}` line and extract `delta` (token text)
+   *   5. Append each delta to the assistant message for real-time rendering
+   *   6. Stop when `data: [DONE]` is received (session.idle on the server)
+   *
+   * The SSE format matches what the server produces:
+   *   - `data: {"delta":"token text"}\n\n` — incremental content
+   *   - `data: [DONE]\n\n` — stream complete
+   *
+   * Error handling: If the fetch fails or the stream errors, the last
+   * assistant message is replaced with a user-friendly error.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     const trimmed = input.trim();
